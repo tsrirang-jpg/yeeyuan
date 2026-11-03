@@ -45,6 +45,9 @@ export function StoreIcon({
   );
 }
 function photoIndex(product: Pick<Product, "name" | "station">) {
+  if (product.name.includes("ปากหม้อ")) return 6;
+  if (product.name.includes("เล้ง")) return 7;
+  if (product.name.includes("ข้าวสวย")) return 8;
   if (product.name.includes("น้ำดื่ม")) return 5;
   if (product.name.includes("มะนาว")) return 4;
   if (product.station === "DRINK") return 3;

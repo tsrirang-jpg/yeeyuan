@@ -299,7 +299,7 @@
 }
 .reference-storefront .ref-category-grid {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
   gap: 15px;
 }
 .reference-storefront .ref-category-card {
@@ -1440,5 +1440,28 @@
   .reference-storefront .product-dialog .quantity button {
     width: 36px;
     min-height: 38px;
+  }
+}
+
+.reference-storefront .ref-photo-6,
+.reference-storefront .ref-photo-7,
+.reference-storefront .ref-photo-8 {
+  background-size: cover;
+  background-position: center;
+}
+.reference-storefront .ref-photo-6 {
+  background-image: url("/images/pak-mor.png");
+}
+.reference-storefront .ref-photo-7 {
+  background-image: url("/images/leng.png");
+}
+.reference-storefront .ref-photo-8 {
+  background-image: url("/images/rice.png");
+}
+@media (max-width: 600px) {
+  .reference-storefront
+    .ref-category-grid
+    > .ref-category-card:first-child:nth-last-child(odd) {
+    grid-column: 1 / -1;
   }
 }
