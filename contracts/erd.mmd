@@ -1,0 +1,366 @@
+erDiagram
+    store {
+        uuid id PK
+        text name
+        text timezone
+        char currency
+        boolean accepting_orders
+        jsonb hours
+        bigint packaging_fee_satang
+        bigint catalog_version
+        boolean vat_registered
+        integer vat_rate_bps
+        timestamptz created_at
+    }
+    app_user {
+        uuid id PK
+        text kind
+        text line_subject UK
+        text username UK
+        text display_name
+        text phone_ciphertext
+        text password_hash
+        text totp_secret_ciphertext
+        boolean active
+        timestamptz created_at
+    }
+    staff_role {
+        uuid user_id PK, FK
+        uuid store_id PK, FK
+        text role PK
+    }
+    auth_session {
+        uuid id PK
+        uuid user_id FK
+        text token_hash UK
+        text csrf_hash
+        timestamptz expires_at
+        timestamptz absolute_expires_at
+        timestamptz last_seen_at
+        timestamptz created_at
+    }
+    dining_table {
+        uuid id PK
+        uuid store_id FK
+        text code
+        text qr_token_hash UK
+        boolean active
+    }
+    table_visit {
+        uuid id PK
+        uuid table_id FK
+        text join_pin_hash
+        text status
+        timestamptz expires_at
+        uuid opened_by FK
+        timestamptz closed_at
+        bigint version
+        timestamptz created_at
+    }
+    table_visit_member {
+        uuid visit_id PK, FK
+        uuid user_id PK, FK
+        timestamptz joined_at
+    }
+    category {
+        uuid id PK
+        uuid store_id FK
+        text name
+        integer sort_order
+        boolean active
+    }
+    product {
+        uuid id PK
+        uuid category_id FK
+        text name
+        text description
+        bigint price_satang
+        text station
+        text image_url
+        boolean active
+        boolean sold_out
+        bigint version
+        timestamptz updated_at
+    }
+    option_group {
+        uuid id PK
+        uuid store_id FK
+        text name
+        integer min_select
+        integer max_select
+    }
+    option_choice {
+        uuid id PK
+        uuid group_id FK
+        text label
+        bigint price_delta_satang
+        boolean active
+    }
+    product_option_group {
+        uuid product_id PK, FK
+        uuid group_id PK, FK
+    }
+    inventory_stock {
+        uuid product_id PK, FK
+        integer available_qty
+        bigint version
+        timestamptz updated_at
+    }
+    quote {
+        uuid id PK
+        uuid customer_id FK
+        uuid store_id FK
+        uuid visit_id FK
+        text mode
+        jsonb request
+        jsonb calculated
+        bigint catalog_version
+        timestamptz expires_at
+        timestamptz created_at
+    }
+    orders {
+        uuid id PK
+        text code UK
+        uuid customer_id FK
+        uuid store_id FK
+        uuid quote_id FK, UK
+        uuid visit_id FK
+        text mode
+        text status
+        text payment_status
+        bigint subtotal_satang
+        bigint packaging_fee_satang
+        bigint total_satang
+        char currency
+        boolean vat_registered_snapshot
+        integer vat_rate_bps_snapshot
+        bigint vat_included_satang
+        text pickup_name
+        text phone_ciphertext
+        text pickup_code_hash
+        text pickup_code_ciphertext
+        timestamptz payment_deadline
+        timestamptz reserve_deadline
+        bigint version
+        timestamptz completed_at
+        timestamptz created_at
+        timestamptz updated_at
+    }
+    order_item {
+        uuid id PK
+        uuid order_id FK
+        uuid product_id FK
+        text name_snapshot
+        bigint unit_base_satang
+        bigint unit_options_satang
+        integer quantity
+        bigint line_total_satang
+        text station
+        varchar note
+    }
+    order_item_option {
+        uuid id PK
+        uuid order_item_id FK
+        uuid choice_id FK
+        text group_snapshot
+        text label_snapshot
+        bigint price_delta_satang
+    }
+    inventory_reservation {
+        uuid id PK
+        uuid order_id FK
+        uuid product_id FK
+        integer quantity
+        text status
+        timestamptz expires_at
+        timestamptz updated_at
+    }
+    kitchen_ticket {
+        uuid id PK
+        uuid order_id FK
+        text station
+        text status
+        bigint version
+        timestamptz started_at
+        timestamptz ready_at
+        timestamptz created_at
+    }
+    order_status_event {
+        uuid id PK
+        uuid order_id FK
+        text from_status
+        text to_status
+        uuid actor_id FK
+        text reason
+        timestamptz created_at
+    }
+    payment_attempt {
+        uuid id PK
+        uuid order_id FK
+        text provider
+        text ref_id UK
+        text provider_charge_id UK
+        text status
+        bigint amount_satang
+        char currency
+        boolean livemode
+        text provider_status
+        text qr_document_path
+        timestamptz expires_at
+        timestamptz paid_at
+        timestamptz verified_at
+        bigint fee_satang
+        bigint fee_vat_satang
+        bigint net_satang
+        timestamptz next_check_at
+        integer check_count
+        text last_error_code
+        timestamptz created_at
+        timestamptz updated_at
+    }
+    webhook_inbox {
+        uuid id PK
+        text provider
+        text event_id
+        text event_type
+        jsonb payload
+        text body_hash
+        text status
+        integer attempt_count
+        timestamptz next_attempt_at
+        timestamptz locked_until
+        uuid lease_token
+        text last_error_code
+        timestamptz received_at
+        timestamptz processed_at
+    }
+    outbox_event {
+        uuid id PK
+        text topic
+        uuid aggregate_id
+        text dedupe_key UK
+        jsonb payload
+        text status
+        integer attempt_count
+        timestamptz next_attempt_at
+        timestamptz locked_until
+        uuid lease_token
+        text last_error_code
+        timestamptz expires_at
+        timestamptz created_at
+        timestamptz sent_at
+    }
+    refund_case {
+        uuid id PK
+        uuid attempt_id FK
+        bigint amount_satang
+        text status
+        text reason
+        text bank_details_ciphertext
+        text bank_reference UK
+        text evidence_ref
+        uuid requested_by FK
+        uuid approved_by FK
+        uuid paid_by FK
+        timestamptz approved_at
+        timestamptz paid_at
+        bigint version
+        timestamptz created_at
+    }
+    payment_incident {
+        uuid id PK
+        uuid order_id FK
+        uuid attempt_id FK
+        text kind
+        text status
+        jsonb details
+        bigint version
+        text resolution
+        uuid resolved_by FK
+        timestamptz resolved_at
+        timestamptz created_at
+    }
+    settlement_transfer {
+        uuid id PK
+        text provider_transfer_id UK
+        bigint amount_satang
+        bigint fee_satang
+        bigint net_satang
+        text status
+        text bank_reference
+        timestamptz paid_at
+        timestamptz verified_at
+        timestamptz created_at
+    }
+    settlement_entry {
+        uuid transfer_id PK, FK
+        uuid attempt_id PK, FK
+        bigint allocated_net_satang
+    }
+    idempotency_record {
+        uuid id PK
+        uuid principal_id FK
+        text method
+        text path
+        uuid key
+        text request_hash
+        text state
+        integer response_code
+        jsonb response_body
+        timestamptz expires_at
+        timestamptz created_at
+    }
+    audit_log {
+        uuid id PK
+        uuid actor_id FK
+        text action
+        text resource_type
+        uuid resource_id
+        jsonb before_redacted
+        jsonb after_redacted
+        text trace_id
+        timestamptz created_at
+    }
+    app_user ||--o{ staff_role : "user_id"
+    store ||--o{ staff_role : "store_id"
+    app_user |o--o{ auth_session : "user_id"
+    store ||--o{ dining_table : "store_id"
+    dining_table ||--o{ table_visit : "table_id"
+    app_user ||--o{ table_visit : "opened_by"
+    table_visit ||--o{ table_visit_member : "visit_id"
+    app_user ||--o{ table_visit_member : "user_id"
+    store ||--o{ category : "store_id"
+    category ||--o{ product : "category_id"
+    store ||--o{ option_group : "store_id"
+    option_group ||--o{ option_choice : "group_id"
+    product ||--o{ product_option_group : "product_id"
+    option_group ||--o{ product_option_group : "group_id"
+    product ||--o| inventory_stock : "product_id"
+    app_user ||--o{ quote : "customer_id"
+    store ||--o{ quote : "store_id"
+    table_visit |o--o{ quote : "visit_id"
+    app_user ||--o{ orders : "customer_id"
+    store ||--o{ orders : "store_id"
+    quote ||--o| orders : "quote_id"
+    table_visit |o--o{ orders : "visit_id"
+    orders ||--o{ order_item : "order_id"
+    product ||--o{ order_item : "product_id"
+    order_item ||--o{ order_item_option : "order_item_id"
+    option_choice ||--o{ order_item_option : "choice_id"
+    orders ||--o{ inventory_reservation : "order_id"
+    inventory_stock ||--o{ inventory_reservation : "product_id"
+    orders ||--o{ kitchen_ticket : "order_id"
+    orders ||--o{ order_status_event : "order_id"
+    app_user |o--o{ order_status_event : "actor_id"
+    orders ||--o{ payment_attempt : "order_id"
+    payment_attempt ||--o{ refund_case : "attempt_id"
+    app_user ||--o{ refund_case : "requested_by"
+    app_user |o--o{ refund_case : "approved_by"
+    app_user |o--o{ refund_case : "paid_by"
+    orders ||--o{ payment_incident : "order_id"
+    payment_attempt |o--o{ payment_incident : "attempt_id"
+    app_user |o--o{ payment_incident : "resolved_by"
+    settlement_transfer ||--o{ settlement_entry : "transfer_id"
+    payment_attempt ||--o{ settlement_entry : "attempt_id"
+    app_user ||--o{ idempotency_record : "principal_id"
+    app_user |o--o{ audit_log : "actor_id"

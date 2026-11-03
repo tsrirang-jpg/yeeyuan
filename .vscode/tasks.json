@@ -1,0 +1,25 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Yee Yuan frontend",
+      "type": "shell",
+      "command": "npm run dev",
+      "isBackground": true,
+      "problemMatcher": []
+    },
+    {
+      "label": "Yee Yuan API and PostgreSQL",
+      "type": "shell",
+      "command": "docker compose up --build",
+      "isBackground": true,
+      "problemMatcher": []
+    },
+    {
+      "label": "Yee Yuan checks",
+      "type": "shell",
+      "command": "npm run lint && npx tsc --noEmit && npm run build",
+      "problemMatcher": []
+    }
+  ]
+}

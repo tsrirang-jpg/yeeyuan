@@ -1,0 +1,26 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: yeeyuan
+      POSTGRES_USER: yeeyuan
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD:-local-postgres-only}
+    ports: ["127.0.0.1:15432:5432"]
+    volumes: ["yeeyuan-data:/var/lib/postgresql/data"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U yeeyuan"]
+      interval: 5s
+      timeout: 3s
+      retries: 15
+  api:
+    build: ./backend
+    env_file: .env.backend
+    environment:
+      DATABASE_URL: jdbc:postgresql://postgres:5432/yeeyuan
+    ports: ["127.0.0.1:8080:8080"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+volumes:
+  yeeyuan-data:
+

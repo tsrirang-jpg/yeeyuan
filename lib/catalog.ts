@@ -1,0 +1,118 @@
+import type { Menu, OptionGroup } from "./types";
+const group = (
+  id: string,
+  name: string,
+  minSelect: number,
+  maxSelect: number,
+  values: [string, string, number][],
+): OptionGroup => ({
+  id,
+  name,
+  minSelect,
+  maxSelect,
+  choices: values.map(([id, label, priceDeltaSatang]) => ({
+    id,
+    label,
+    priceDeltaSatang,
+    active: true,
+  })),
+});
+export const size = group("size", "ขนาด", 1, 1, [
+  ["regular", "ธรรมดา", 0],
+  ["large", "พิเศษ", 1500],
+]);
+export const extra = group("extra", "เพิ่มความอร่อย", 0, 2, [
+  ["egg", "ไข่ลวก", 1000],
+  ["pork", "หมูยอ", 1500],
+]);
+export const sweet = group("sweet", "ความหวาน", 1, 1, [
+  ["s0", "ไม่หวาน", 0],
+  ["s50", "หวานน้อย", 0],
+  ["s100", "หวานปกติ", 0],
+]);
+export const ice = group("ice", "น้ำแข็ง", 1, 1, [
+  ["i100", "น้ำแข็งปกติ", 0],
+  ["i50", "น้ำแข็งน้อย", 0],
+]);
+export const demoMenu: Menu = {
+  catalogVersion: 1,
+  categories: [
+    { id: "noodles", name: "ก๋วยจั๊บญวน" },
+    { id: "sides", name: "ทานเล่น" },
+    { id: "drinks", name: "เครื่องดื่ม" },
+  ],
+  products: [
+    {
+      id: "original",
+      categoryId: "noodles",
+      name: "ก๋วยจั๊บญวนต้นตำรับ",
+      description: "เส้นนุ่ม น้ำซุปเคี่ยวหอม หมูยอและหมูสับ โรยหอมเจียว",
+      priceSatang: 6000,
+      station: "FOOD",
+      active: true,
+      soldOut: false,
+      optionGroups: [size, extra],
+      version: 0,
+    },
+    {
+      id: "special",
+      categoryId: "noodles",
+      name: "ก๋วยจั๊บญวนหมูเด้ง",
+      description: "หมูเด้งเต็มคำในน้ำซุปกลมกล่อม กับเส้นสดเหนียวนุ่ม",
+      priceSatang: 7500,
+      station: "FOOD",
+      active: true,
+      soldOut: false,
+      optionGroups: [size, extra],
+      version: 0,
+    },
+    {
+      id: "crispy",
+      categoryId: "sides",
+      name: "หมูยอทอด",
+      description: "หมูยอเนื้อแน่นทอดร้อน ๆ พร้อมน้ำจิ้มสูตรของร้าน",
+      priceSatang: 5000,
+      station: "FOOD",
+      active: true,
+      soldOut: false,
+      optionGroups: [],
+      version: 0,
+    },
+    {
+      id: "tea",
+      categoryId: "drinks",
+      name: "ชาไทยเย็น",
+      description: "ชาหอมเข้มข้น ชงสดทุกแก้ว เลือกความหวานได้",
+      priceSatang: 3000,
+      station: "DRINK",
+      active: true,
+      soldOut: false,
+      optionGroups: [sweet, ice],
+      version: 0,
+    },
+    {
+      id: "lime",
+      categoryId: "drinks",
+      name: "ชามะนาว",
+      description: "ชาใสหอม ๆ ผสมมะนาว เปรี้ยวหวานสดชื่น",
+      priceSatang: 3000,
+      station: "DRINK",
+      active: true,
+      soldOut: false,
+      optionGroups: [sweet, ice],
+      version: 0,
+    },
+    {
+      id: "water",
+      categoryId: "drinks",
+      name: "น้ำดื่ม",
+      description: "น้ำดื่มเย็น ขนาด 600 มล.",
+      priceSatang: 1500,
+      station: "DRINK",
+      active: true,
+      soldOut: false,
+      optionGroups: [],
+      version: 0,
+    },
+  ],
+};
