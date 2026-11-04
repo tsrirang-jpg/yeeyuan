@@ -17,6 +17,7 @@ public class Api {
  record Transition(@NotBlank String targetStatus,@Min(0) long version){}
  record Complete(@Min(0) long version,String pickupCode){}
  record Join(@NotBlank String qrToken,@Pattern(regexp="[0-9]{6}") String pin){}
+ record ScanJoin(@NotBlank @Size(max=512) String qrToken){}
  @GetMapping("/auth/csrf") Object csrf(HttpServletRequest r,HttpServletResponse s){return auth.csrf(r,s);}
  @PostMapping("/auth/guest") @ResponseStatus(HttpStatus.CREATED) Object guest(HttpServletRequest r,HttpServletResponse s){return auth.guest(r,s);}
  @PostMapping("/auth/staff") Object staff(@Valid @RequestBody StaffLogin b,HttpServletRequest r,HttpServletResponse s){return auth.staffLogin(b.username,b.password,b.totp,r,s);}
@@ -40,6 +41,7 @@ public class Api {
  @PostMapping("/staff/kitchen-tickets/{id}/transition") Object transition(@PathVariable UUID id,@Valid @RequestBody Transition b,HttpServletRequest r){orders.transition(auth.kitchen(r),id,b.targetStatus,b.version);return Map.of("accepted",true);}
  @PostMapping("/staff/orders/{id}/complete") Object complete(@PathVariable UUID id,@Valid @RequestBody Complete b,HttpServletRequest r){return orders.complete(auth.cashier(r),id,b.version,b.pickupCode);}
  @PostMapping("/table-visits/join") Object join(@Valid @RequestBody Join b,HttpServletRequest r){return admin.join(auth.user(r),b.qrToken,b.pin);}
+ @PostMapping("/table-visits/scan") Object scanJoin(@Valid @RequestBody ScanJoin b,HttpServletRequest r){return admin.scanJoin(auth.user(r),b.qrToken);}
  @GetMapping("/staff/tables") Object tables(HttpServletRequest r){auth.cashier(r);return admin.tables();}
  @PostMapping("/staff/tables/{id}/rotate-qr") Object rotate(@PathVariable UUID id,HttpServletRequest r){return admin.rotate(auth.manager(r),id);}
  @PostMapping("/staff/table-visits") Object open(@RequestBody Map<String,String> b,HttpServletRequest r){return admin.open(auth.cashier(r),UUID.fromString(b.get("tableId")));}

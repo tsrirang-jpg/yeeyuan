@@ -58,7 +58,24 @@ export default function Storefront() {
           if (token) {
             setTableToken(token);
             setMode("DINE_IN");
-            setShowVisit(true);
+            setBusy(true);
+            void api
+              .scanTable(token)
+              .then((tableVisit) => {
+                if (alive) {
+                  setVisit(tableVisit);
+                  setError("");
+                }
+              })
+              .catch((e) => {
+                if (alive) {
+                  setError(e instanceof Error ? e.message : "เข้าร่วมโต๊ะไม่สำเร็จ");
+                  setShowVisit(true);
+                }
+              })
+              .finally(() => {
+                if (alive) setBusy(false);
+              });
           }
           setMenu(m);
           setStore(s);
@@ -386,7 +403,9 @@ export default function Storefront() {
                 <i className={store?.acceptingOrders ? "is-open" : ""} />
                 {!store
                   ? "กำลังตรวจสอบร้าน"
-                  : store.acceptingOrders
+                  : visit && mode === "DINE_IN"
+                    ? `พร้อมสั่ง · โต๊ะ ${visit.tableCode}`
+                    : store.acceptingOrders
                     ? "เปิดรับออเดอร์"
                     : "พักรับออเดอร์ชั่วคราว"}
               </span>
@@ -940,7 +959,7 @@ export default function Storefront() {
             </button>
             <span className="eyebrow">DINE WITH US</span>
             <h2 id="visit-title">ยินดีต้อนรับที่โต๊ะ</h2>
-            <p className="muted">สแกน QR ประจำโต๊ะและใส่รหัสที่พนักงานแจ้ง</p>
+            <p className="muted">{tableToken ? "QR ???????????? ???????????????????? ????????????????????????????????" : "???? QR ??????? ?????????????????? PIN ??????????????"}</p>
             {!tableToken && !api.DEMO && (
               <label className="field-label">
                 รหัส QR โต๊ะ
@@ -950,7 +969,8 @@ export default function Storefront() {
                 />
               </label>
             )}
-            <label className="field-label">
+            {!tableToken && (
+              <label className="field-label">
               รหัสรอบโต๊ะ 6 หลัก
               <input
                 inputMode="numeric"
@@ -960,6 +980,7 @@ export default function Storefront() {
                 placeholder={api.DEMO ? "โหมดตัวอย่าง ใส่ 123456" : "••••••"}
               />
             </label>
+            )}
             {error && (
               <p role="alert" className="error-message">
                 {error}
@@ -967,12 +988,15 @@ export default function Storefront() {
             )}
             <button
               className="primary-button"
-              disabled={busy || pin.length !== 6}
+              disabled={busy || (!tableToken && pin.length !== 6)}
               onClick={() =>
                 run(async () => {
-                  const v = await api.joinVisit(tableToken, pin);
+                  const v = tableToken
+                    ? await api.scanTable(tableToken)
+                    : await api.joinVisit(tableToken, pin);
                   setVisit(v);
                   setShowVisit(false);
+                  setError("");
                 })
               }
             >

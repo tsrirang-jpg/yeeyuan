@@ -10,8 +10,22 @@ import type {
   Ticket,
 } from "./types";
 export const DEMO = process.env.NEXT_PUBLIC_DEMO_MODE === "true";
-const BASE =
+const configuredBase =
   process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080/api/v1";
+const BASE = (() => {
+  if (process.env.NODE_ENV !== "development" || typeof window === "undefined") {
+    return configuredBase;
+  }
+  const hostname = window.location.hostname;
+  if (hostname !== "localhost" && hostname !== "127.0.0.1") {
+    return configuredBase;
+  }
+  // Keep the API cookie same-site when the dev server is opened via localhost
+  // or 127.0.0.1; browsers treat those hostnames as different sites.
+  const apiUrl = new URL(configuredBase);
+  apiUrl.hostname = hostname;
+  return apiUrl.toString().replace(/\/$/, "");
+})();
 let csrf = "";
 export async function request<T>(
   path: string,
@@ -110,6 +124,16 @@ export const joinVisit = (
   DEMO
     ? Promise.resolve({ id: "demo-visit", tableCode: "05" })
     : request("/table-visits/join", "POST", { qrToken, pin });
+export const scanTable = (
+  qrToken: string,
+): Promise<{ id: string; tableCode: string; expiresAt: string }> =>
+  DEMO
+    ? Promise.resolve({
+        id: "demo-visit",
+        tableCode: "05",
+        expiresAt: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
+      })
+    : request("/table-visits/scan", "POST", { qrToken });
 export const staffLogin = async (
   username: string,
   password: string,

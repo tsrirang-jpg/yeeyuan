@@ -136,15 +136,13 @@ export default function Management({
       </section>
       <section className="tracking-card">
         <h2>โต๊ะและรอบลูกค้า</h2>
-        <p className="muted">
-          สร้าง QR สำหรับโต๊ะ และเปิดรอบเพื่อรับ PIN ให้ลูกค้าที่โต๊ะ
-        </p>
+        <p className="muted">เปิดรอบโต๊ะก่อน แล้วให้ลูกค้าสแกน QR ประจำโต๊ะเพื่อระบุโต๊ะและเริ่มสั่งอาหาร</p>
         <div className="table-cards">
           {tables.map((t) => (
             <div className="table-card" key={t.id}>
               <b>โต๊ะ {t.code}</b>
               <span className="muted">
-                {t.visit_id ? "กำลังเปิดรอบ" : "ยังไม่เปิดรอบ"}
+                {t.visit_id ? "ปิดรอบ" : "เปิดรอบโต๊ะ"}
               </span>
               <div className="table-actions">
                 <button
@@ -164,9 +162,7 @@ export default function Management({
                           "POST",
                           { tableId: t.id },
                         );
-                        setNotice(
-                          `โต๊ะ ${t.code} · PIN รอบนี้ ${result.pin} — แจ้งให้ลูกค้าที่โต๊ะเท่านั้น`,
-                        );
+                        setNotice(`โต๊ะ ${t.code} เปิดรอบแล้ว · ลูกค้าสแกน QR เพื่อสั่งอาหาร (PIN สำรอง ${result.pin})`);
                       }
                     })
                   }

@@ -1465,3 +1465,405 @@
     grid-column: 1 / -1;
   }
 }
+
+/* Warm, simple ordering theme. Keep the existing storefront interactions intact. */
+.reference-storefront {
+  --ink: #29372f;
+  --green: #315843;
+  --muted: #747b72;
+  --line: #e8e1d5;
+  color: var(--ink);
+  background: #f2f0e9;
+}
+.reference-storefront .ref-page {
+  border-color: #fffdf8;
+  background: #fffdf8;
+}
+.reference-storefront .ref-brand > span {
+  background: #315843;
+}
+.reference-storefront .ref-icon-button {
+  border-color: #e8e1d5;
+  background: #fffdf8;
+  color: #315843;
+}
+.reference-storefront .ref-cart-count {
+  background: #c76546;
+}
+.reference-storefront .ref-button,
+.reference-storefront .ref-add-button,
+.reference-storefront .ref-floating-cart,
+.reference-storefront .ref-step-icon,
+.reference-storefront .primary-button {
+  background: #315843;
+  border-color: #315843;
+}
+.reference-storefront .ref-button:hover,
+.reference-storefront .ref-add-button:hover:not(:disabled),
+.reference-storefront .primary-button:hover:not(:disabled) {
+  background: #264634;
+}
+.reference-storefront .ref-button-outline {
+  color: #315843;
+  border-color: #315843;
+}
+.reference-storefront .ref-eyebrow::before {
+  background: #c76546;
+}
+.reference-storefront .ref-fresh-sticker {
+  background: #315843;
+}
+.reference-storefront .ref-food-sticker > span {
+  background: #f3ead9;
+  color: #315843;
+}
+.reference-storefront .ref-category-card {
+  border-color: #e8e1d5;
+  color: #35443a;
+}
+.reference-storefront .ref-category-card > span {
+  background: #f3ead9;
+  color: #58745d;
+}
+.reference-storefront .ref-category-card.is-active {
+  border-color: #315843;
+}
+.reference-storefront .ref-category-card.is-active > span {
+  background: #315843;
+  color: #fffdf8;
+}
+.reference-storefront .ref-menu {
+  background: #fffdf8;
+}
+.reference-storefront .ref-mode-switch {
+  background: #f1eee6;
+}
+.reference-storefront .ref-mode-switch button.is-active,
+.reference-storefront .ref-menu-tag {
+  background: #315843;
+}
+.reference-storefront .ref-search-field,
+.reference-storefront .ref-product-card {
+  border-color: #e8e1d5;
+}
+.reference-storefront .ref-product-image {
+  background: #f3ead9;
+}
+.reference-storefront .ref-product-title strong {
+  color: #315843;
+}
+.reference-storefront dialog.cart-panel {
+  border-color: #e8e1d5;
+  color: #29372f;
+  background: #fffdf8;
+}
+.reference-storefront .cart-heading h2 span {
+  background: #f3ead9;
+  color: #315843;
+}
+
+@media (max-width: 600px) {
+  .reference-storefront {
+    padding: 0;
+    background: #f2f0e9;
+  }
+  .reference-storefront .ref-page {
+    border: 0;
+    border-radius: 0;
+    background: #fffdf8;
+  }
+  .reference-storefront .ref-header {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    padding: 12px 18px;
+    border-bottom: 1px solid #eee8dc;
+    background: rgb(255 253 248 / 94%);
+    backdrop-filter: blur(14px);
+  }
+  .reference-storefront .ref-brand {
+    color: #29372f;
+  }
+  .reference-storefront .ref-header-order {
+    min-height: 38px;
+    padding: 8px 16px;
+    background: #315843;
+    color: #fff;
+  }
+  .reference-storefront .ref-demo-note {
+    margin: 10px 16px 0;
+    border-color: #ead9b8;
+    background: #fff7e6;
+  }
+  .reference-storefront .ref-padding {
+    padding: 28px 18px;
+  }
+  .reference-storefront .ref-hero {
+    display: grid;
+    grid-template-columns: minmax(0, 1.12fr) minmax(105px, 0.88fr);
+    align-items: center;
+    gap: 8px;
+    margin: 12px 12px 0;
+    padding: 20px 16px;
+    border-radius: 22px;
+    background: #f4e8d4;
+  }
+  .reference-storefront .ref-eyebrow {
+    font-size: 9px;
+    color: #788071;
+  }
+  .reference-storefront .ref-hero h1 {
+    margin: 9px 0 8px;
+    color: #29372f;
+    font-size: clamp(21px, 6vw, 25px);
+    line-height: 1.45;
+    letter-spacing: -0.7px;
+  }
+  .reference-storefront .ref-hero p {
+    margin: 0 0 12px;
+    color: #697368;
+    font-size: 10px;
+    line-height: 1.7;
+  }
+  .reference-storefront .ref-hero-buttons {
+    gap: 0;
+  }
+  .reference-storefront .ref-hero-buttons .ref-button {
+    min-height: 38px;
+    padding: 8px 12px;
+    gap: 7px;
+    font-size: 10px;
+  }
+  .reference-storefront .ref-hero-buttons .ref-button-outline,
+  .reference-storefront .ref-facts,
+  .reference-storefront .ref-food-sticker {
+    display: none;
+  }
+  .reference-storefront .ref-hero-visual {
+    width: 100%;
+    align-self: center;
+    margin: 0;
+    padding: 0;
+  }
+  .reference-storefront .ref-hero-food {
+    width: 100%;
+    border: 5px solid rgb(255 253 248 / 72%);
+    box-shadow: 0 8px 18px rgb(70 58 38 / 12%);
+  }
+  .reference-storefront .ref-fresh-sticker {
+    right: -7px;
+    bottom: 4px;
+    padding: 7px 9px;
+    border: 2px solid #f4e8d4;
+    border-radius: 11px;
+    font-size: 8px;
+  }
+  .reference-storefront .ref-fresh-sticker i {
+    width: 5px;
+    height: 5px;
+    background: #e7b66e;
+  }
+  .reference-storefront .ref-categories {
+    padding: 24px 0 14px;
+    scroll-margin-top: 76px;
+  }
+  .reference-storefront .ref-categories .ref-section-heading {
+    align-items: end;
+    margin: 0 18px 12px;
+  }
+  .reference-storefront .ref-categories h2,
+  .reference-storefront .ref-menu h2 {
+    margin-top: 3px;
+    color: #29372f;
+    font-size: 19px;
+    line-height: 1.5;
+    letter-spacing: -0.4px;
+  }
+  .reference-storefront .ref-text-link {
+    padding: 0 0 2px;
+    color: #58745d;
+    font-size: 10px;
+  }
+  .reference-storefront .ref-category-grid {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding: 0 18px 5px;
+    scrollbar-width: none;
+    scroll-snap-type: x proximity;
+  }
+  .reference-storefront .ref-category-grid::-webkit-scrollbar {
+    display: none;
+  }
+  .reference-storefront .ref-category-card {
+    flex: 0 0 auto;
+    flex-direction: row;
+    gap: 0;
+    min-height: 40px;
+    padding: 8px 14px;
+    border: 1px solid #e8e1d5;
+    border-radius: 999px;
+    background: #f7f4ed;
+    scroll-snap-align: start;
+  }
+  .reference-storefront .ref-category-card:hover {
+    transform: none;
+  }
+  .reference-storefront .ref-category-card > span,
+  .reference-storefront .ref-category-card small {
+    display: none;
+  }
+  .reference-storefront .ref-category-card b {
+    font-size: 11px;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+  .reference-storefront .ref-category-card.is-active {
+    border-color: #315843;
+    background: #315843;
+    color: #fffdf8;
+  }
+  .reference-storefront .ref-menu {
+    padding: 22px 16px 34px;
+    background: #fffdf8;
+    scroll-margin-top: 68px;
+  }
+  .reference-storefront .ref-menu .ref-section-heading {
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 14px;
+  }
+  .reference-storefront .ref-menu .ref-eyebrow {
+    letter-spacing: 0.6px;
+  }
+  .reference-storefront .ref-store-status {
+    padding: 7px 9px;
+    border: 1px solid #e8e1d5;
+    border-radius: 999px;
+    background: #f8f6f0;
+    color: #657269;
+    font-size: 9px;
+  }
+  .reference-storefront .ref-store-status i.is-open {
+    background: #648263;
+  }
+  .reference-storefront .ref-menu-tools {
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+  .reference-storefront .ref-mode-switch {
+    display: flex;
+    align-self: stretch;
+    justify-content: stretch;
+    padding: 3px;
+    border: 1px solid #ebe5d9;
+    border-radius: 14px;
+    background: #f6f3ec;
+  }
+  .reference-storefront .ref-mode-switch button {
+    flex: 1;
+    min-height: 40px;
+    padding: 8px 10px;
+    border-radius: 11px;
+    color: #667168;
+  }
+  .reference-storefront .ref-mode-switch button.is-active {
+    background: #315843;
+    color: #fff;
+  }
+  .reference-storefront .ref-search-field {
+    min-height: 44px;
+    padding: 0 14px;
+    border-color: #e8e1d5;
+    border-radius: 13px;
+    background: #fff;
+  }
+  .reference-storefront .ref-search-field input {
+    font-size: 12px;
+  }
+  .reference-storefront .ref-product-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 10px;
+  }
+  .reference-storefront .ref-product-card {
+    display: grid;
+    grid-template-columns: 104px minmax(0, 1fr);
+    min-height: 112px;
+    border-color: #ebe5d9;
+    border-radius: 16px;
+    background: #fff;
+  }
+  .reference-storefront .ref-product-image {
+    width: 104px;
+    height: 100%;
+    min-height: 112px;
+    border-radius: 15px;
+    background: #f3ead9;
+  }
+  .reference-storefront .ref-product-image .ref-food-photo {
+    height: 100%;
+    min-height: 112px;
+    aspect-ratio: auto;
+  }
+  .reference-storefront .ref-menu-tag {
+    top: 7px;
+    left: 7px;
+    padding: 3px 7px;
+    border-radius: 999px;
+    background: #315843;
+    font-size: 8px;
+  }
+  .reference-storefront .ref-product-content {
+    min-width: 0;
+    align-items: stretch;
+    justify-content: center;
+    gap: 8px;
+    padding: 11px 12px;
+  }
+  .reference-storefront .ref-product-title {
+    flex-direction: column;
+    gap: 1px;
+  }
+  .reference-storefront .ref-product-title h3 {
+    font-size: 12px;
+    line-height: 1.55;
+  }
+  .reference-storefront .ref-product-title strong {
+    color: #315843;
+    font-size: 13px;
+  }
+  .reference-storefront .ref-add-button {
+    align-self: flex-start;
+    min-width: 76px;
+    min-height: 32px;
+    padding: 5px 12px;
+    border-radius: 999px;
+    background: #315843;
+    font-size: 10px;
+  }
+  .reference-storefront .ref-allergen-note {
+    margin-top: 18px;
+    color: #7b8179;
+    font-size: 10px;
+  }
+  .reference-storefront .ref-floating-cart {
+    right: 14px;
+    bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+    left: 14px;
+    min-height: 52px;
+    padding: 12px 16px;
+    border: 1px solid #315843;
+    border-radius: 17px;
+    background: #315843;
+    box-shadow: 0 8px 25px rgb(37 59 43 / 22%);
+  }
+  .reference-storefront .ref-footer {
+    padding-bottom: 100px;
+    background: #f7f4ed;
+  }
+  .reference-storefront dialog.cart-panel,
+  .reference-storefront dialog.product-dialog {
+    border-color: #e8e1d5;
+    background: #fffdf8;
+  }
+}
