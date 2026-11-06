@@ -2,7 +2,8 @@ package com.yeeyuan;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties("shop")
 public record Settings(String environment, boolean mockPayments, boolean secureCookies, String allowedOrigins,
- String publicAppUrl,String apiBaseUrl,String encryptionKey,String adminPassword,String adminTotpSecret,
+ String publicAppUrl,String apiBaseUrl,String encryptionKey,String adminUsername,String adminRole,
+ String adminPassword,String adminTotpSecret,
  String omiseSecretKey,String omiseWebhookSecret,String omiseApiVersion,String lineLoginChannelId,
  String lineChannelSecret,String lineChannelAccessToken) {
  public boolean local(){return "local".equals(environment);}

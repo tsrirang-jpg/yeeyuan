@@ -37,6 +37,10 @@ services:
         value: https://yeeyuan.onrender.com
       - key: API_BASE_URL
         value: https://yeeyuan-api.onrender.com/api/v1
+      - key: BOOTSTRAP_ADMIN_USERNAME
+        value: gameqa
+      - key: BOOTSTRAP_ADMIN_ROLE
+        value: MANAGER
       - key: DB_HOST
         fromDatabase:
           name: yeeyuan-db
