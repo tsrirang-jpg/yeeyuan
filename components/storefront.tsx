@@ -46,7 +46,6 @@ export default function Storefront() {
     if (token) {
       setTableToken(token);
       setMode("DINE_IN");
-      setBusy(true);
     }
     void api
       .getMenu()
@@ -999,6 +998,7 @@ export default function Storefront() {
               disabled={busy || (!tableToken && pin.length !== 6)}
               onClick={() =>
                 run(async () => {
+                  await api.bootstrap();
                   const v = tableToken
                     ? await api.scanTable(tableToken)
                     : await api.joinVisit(tableToken, pin);
