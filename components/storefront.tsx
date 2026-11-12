@@ -42,47 +42,55 @@ export default function Storefront() {
   const [cartOpen, setCartOpen] = useState(false);
   useEffect(() => {
     let alive = true;
-    api
-      .bootstrap()
-      .then(() => Promise.all([api.getMenu(), api.getStore()]))
-      .then(([m, s]) => {
-        if (alive) {
-          const saved = localStorage.getItem("yeeyuan-cart");
-          if (saved)
-            try {
-              setCart(JSON.parse(saved));
-            } catch {
-              localStorage.removeItem("yeeyuan-cart");
-            }
-          const token = new URLSearchParams(location.search).get("tableToken");
-          if (token) {
-            setTableToken(token);
-            setMode("DINE_IN");
-            setBusy(true);
-            void api
-              .scanTable(token)
-              .then((tableVisit) => {
-                if (alive) {
-                  setVisit(tableVisit);
-                  setError("");
-                }
-              })
-              .catch((e) => {
-                if (alive) {
-                  setError(e instanceof Error ? e.message : "เข้าร่วมโต๊ะไม่สำเร็จ");
-                  setShowVisit(true);
-                }
-              })
-              .finally(() => {
-                if (alive) setBusy(false);
-              });
+    const token = new URLSearchParams(location.search).get("tableToken");
+    if (token) {
+      setTableToken(token);
+      setMode("DINE_IN");
+      setBusy(true);
+    }
+    void api
+      .getMenu()
+      .then((m) => {
+        if (!alive) return;
+        const saved = localStorage.getItem("yeeyuan-cart");
+        if (saved)
+          try {
+            setCart(JSON.parse(saved));
+          } catch {
+            localStorage.removeItem("yeeyuan-cart");
           }
-          setMenu(m);
-          setStore(s);
+        setMenu(m);
+      })
+      .catch((e) => {
+        if (alive)
+          setError(e instanceof Error ? e.message : "โหลดเมนูไม่สำเร็จ");
+      });
+    void api
+      .getStore()
+      .then((s) => {
+        if (alive) setStore(s);
+      })
+      .catch((e) => {
+        if (alive)
+          setError(e instanceof Error ? e.message : "โหลดข้อมูลร้านไม่สำเร็จ");
+      });
+    void api
+      .bootstrap()
+      .then(() => (token ? api.scanTable(token) : undefined))
+      .then((tableVisit) => {
+        if (alive && tableVisit) {
+          setVisit(tableVisit);
+          setError("");
         }
       })
       .catch((e) => {
-        if (alive) setError(e.message);
+        if (alive) {
+          setError(e instanceof Error ? e.message : "เชื่อมต่อโต๊ะไม่สำเร็จ");
+          if (token) setShowVisit(true);
+        }
+      })
+      .finally(() => {
+        if (alive && token) setBusy(false);
       });
     return () => {
       alive = false;

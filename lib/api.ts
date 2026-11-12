@@ -27,28 +27,68 @@ const BASE = (() => {
   return apiUrl.toString().replace(/\/$/, "");
 })();
 let csrf = "";
+class ApiError extends Error {
+  constructor(
+    message: string,
+    readonly status: number,
+  ) {
+    super(message);
+    this.name = "ApiError";
+  }
+}
 export async function request<T>(
   path: string,
   method = "GET",
   body?: unknown,
   idem?: string,
+  timeoutMs?: number,
 ): Promise<T> {
-  const response = await fetch(`${BASE}${path}`, {
-    method,
-    credentials: "include",
-    headers: {
-      ...(body !== undefined ? { "Content-Type": "application/json" } : {}),
-      ...(method !== "GET" ? { "X-CSRF-Token": csrf } : {}),
-      ...(idem ? { "Idempotency-Key": idem } : {}),
-    },
-    ...(body !== undefined ? { body: JSON.stringify(body) } : {}),
-  });
+  const controller = timeoutMs ? new AbortController() : undefined;
+  const timeout = controller
+    ? setTimeout(() => controller.abort(), timeoutMs)
+    : undefined;
+  let response: Response;
+  try {
+    response = await fetch(BASE + path, {
+      method,
+      credentials: "include",
+      headers: {
+        ...(body !== undefined ? { "Content-Type": "application/json" } : {}),
+        ...(method !== "GET" ? { "X-CSRF-Token": csrf } : {}),
+        ...(idem ? { "Idempotency-Key": idem } : {}),
+      },
+      ...(body !== undefined ? { body: JSON.stringify(body) } : {}),
+      ...(controller ? { signal: controller.signal } : {}),
+    });
+  } finally {
+    if (timeout) clearTimeout(timeout);
+  }
   if (!response.ok) {
     const error = await response.json().catch(() => null);
-    throw new Error(error?.detail || "ติดต่อระบบไม่ได้ กรุณาลองใหม่");
+    throw new ApiError(
+      error?.detail || "ติดต่อระบบไม่ได้ กรุณาลองใหม่",
+      response.status,
+    );
   }
   if (response.status === 204) return undefined as T;
   return response.json();
+}
+async function retryRead<T>(path: string): Promise<T> {
+  let lastError: unknown;
+  for (let attempt = 0; attempt < 8; attempt++) {
+    try {
+      return await request<T>(path, "GET", undefined, undefined, 10_000);
+    } catch (error) {
+      lastError = error;
+      if (error instanceof ApiError && error.status < 500) throw error;
+      if (attempt < 7)
+        await new Promise((resolve) =>
+          setTimeout(resolve, Math.min(1_000 * (attempt + 1), 5_000)),
+        );
+    }
+  }
+  if (lastError instanceof Error) throw lastError;
+  throw new Error("ติดต่อระบบไม่ได้ กรุณาลองใหม่");
 }
 let initialized: Promise<void> | undefined;
 export async function bootstrap() {
@@ -72,7 +112,7 @@ async function initialize() {
   }
 }
 export const getMenu = (): Promise<Menu> =>
-  DEMO ? Promise.resolve(demoMenu) : request("/menu");
+  DEMO ? Promise.resolve(demoMenu) : retryRead("/menu");
 export const getStore = (): Promise<Store> =>
   DEMO
     ? Promise.resolve({
@@ -81,7 +121,7 @@ export const getStore = (): Promise<Store> =>
         packagingFeeSatang: 500,
         paymentMode: "MOCK",
       })
-    : request("/store");
+    : retryRead("/store");
 export const quoteCart = (r: QuoteRequest): Promise<Quote> =>
   DEMO ? Promise.resolve(demo.demoQuote(r)) : request("/quotes", "POST", r);
 export const createOrder = (
