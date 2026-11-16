@@ -58,6 +58,36 @@ export type Quote = {
   expiresAt: string;
   lines: { name: string; lineTotalSatang: number }[];
 };
+export type TableVisit = {
+  id: string;
+  tableCode: string;
+  expiresAt: string;
+  billRequestedAt: string | null;
+};
+export type StaffTableOrder = {
+  id: string;
+  code: string;
+  status: string;
+  payment_status: string;
+  total_satang: number;
+  items: {
+    id: string;
+    name: string;
+    quantity: number;
+    line_total_satang: number;
+    note: string | null;
+    options: string;
+  }[];
+};
+export type StaffTable = {
+  id: string;
+  code: string;
+  visit_id: string | null;
+  expires_at: string | null;
+  bill_requested_at: string | null;
+  orders: StaffTableOrder[];
+  total_satang: number;
+};
 export type OrderItem = {
   id: string;
   name: string;

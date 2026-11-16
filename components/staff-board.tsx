@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import * as api from "@/lib/api";
-import { money, statusText, type Order, type Ticket } from "@/lib/types";
+import { money, statusText, type Order, type StaffTable, type Ticket } from "@/lib/types";
 import { Header } from "./brand";
 import Management from "./management";
 export default function StaffBoard() {
@@ -11,15 +11,21 @@ export default function StaffBoard() {
     [totp, setTotp] = useState("");
   const [orders, setOrders] = useState<Order[]>([]),
     [tickets, setTickets] = useState<Ticket[]>([]),
+    [billTables, setBillTables] = useState<StaffTable[]>([]),
     [station, setStation] = useState("ALL"),
     [tab, setTab] = useState("kitchen"),
     [error, setError] = useState(""),
     [busy, setBusy] = useState(false),
     [synced, setSynced] = useState("");
   const refresh = async () => {
-    const [o, t] = await Promise.all([api.staffOrders(), api.tickets()]);
+    const [o, t, tableRows] = await Promise.all([
+      api.staffOrders(),
+      api.tickets(),
+      api.staffTables(),
+    ]);
     setOrders(o);
     setTickets(t);
+    setBillTables(tableRows.filter((table) => Boolean(table.bill_requested_at)));
     setSynced(new Date().toLocaleTimeString("th-TH"));
   };
   useEffect(() => {
@@ -170,6 +176,18 @@ export default function StaffBoard() {
                 <option value="DRINK">เครื่องดื่ม</option>
               </select>
             </div>
+            {billTables.length > 0 && (
+              <div className="bill-request-banner" role="alert">
+                <span>
+                  มีคำขอเช็คบิลจาก
+                  {" "}
+                  {billTables.map((table) => `โต๊ะ ${table.code}`).join(", ")}
+                </span>
+                <button className="small-button" onClick={() => setTab("manage")}>
+                  ดูรายการโต๊ะ
+                </button>
+              </div>
+            )}
             {error && (
               <p className="error-message" role="alert">
                 {error}

@@ -42,6 +42,7 @@ public class Api {
  @PostMapping("/staff/orders/{id}/complete") Object complete(@PathVariable UUID id,@Valid @RequestBody Complete b,HttpServletRequest r){return orders.complete(auth.cashier(r),id,b.version,b.pickupCode);}
  @PostMapping("/table-visits/join") Object join(@Valid @RequestBody Join b,HttpServletRequest r){return admin.join(auth.user(r),b.qrToken,b.pin);}
  @PostMapping("/table-visits/scan") Object scanJoin(@Valid @RequestBody ScanJoin b,HttpServletRequest r){return admin.scanJoin(auth.user(r),b.qrToken);}
+ @PostMapping("/table-visits/{id}/bill-request") Object requestBill(@PathVariable UUID id,HttpServletRequest r){return admin.requestBill(auth.user(r),id);}
  @GetMapping("/staff/tables") Object tables(HttpServletRequest r){auth.cashier(r);return admin.tables();}
  @PostMapping("/staff/tables/{id}/rotate-qr") Object rotate(@PathVariable UUID id,HttpServletRequest r){return admin.rotate(auth.manager(r),id);}
  @PostMapping("/staff/table-visits") Object open(@RequestBody Map<String,String> b,HttpServletRequest r){return admin.open(auth.cashier(r),UUID.fromString(b.get("tableId")));}

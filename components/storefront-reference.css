@@ -390,6 +390,28 @@
   background: #111;
   color: white;
 }
+.reference-storefront .ref-bill-request-wrap {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.reference-storefront .ref-bill-request {
+  border: 1px solid #9b7652;
+  border-radius: 24px;
+  background: #fffaf3;
+  color: #65492d;
+  padding: 10px 18px;
+  font-size: 12px;
+  font-weight: 600;
+}
+.reference-storefront .ref-bill-request:disabled {
+  opacity: 0.7;
+}
+.reference-storefront .ref-bill-message {
+  color: #456a35;
+  font-size: 11px;
+}
 .reference-storefront .ref-search-field {
   width: 300px;
   max-width: 100%;

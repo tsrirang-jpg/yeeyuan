@@ -10,6 +10,7 @@ import {
   type Product,
   type Quote,
   type Store,
+  type TableVisit,
 } from "@/lib/types";
 import Link from "next/link";
 import { FoodPhoto, StoreIcon, type IconName } from "./storefront-art";
@@ -19,9 +20,7 @@ export default function Storefront() {
   const [menu, setMenu] = useState<Menu | null>(null),
     [store, setStore] = useState<Store | null>(null);
   const [mode, setMode] = useState<Mode>("TAKEAWAY"),
-    [visit, setVisit] = useState<{ id: string; tableCode: string } | null>(
-      null,
-    );
+    [visit, setVisit] = useState<TableVisit | null>(null);
   const [category, setCategory] = useState("all"),
     [search, setSearch] = useState("");
   const [cart, setCart] = useState<CartItem[]>([]),
@@ -36,6 +35,8 @@ export default function Storefront() {
   const [showVisit, setShowVisit] = useState(false),
     [pin, setPin] = useState(""),
     [tableToken, setTableToken] = useState("");
+  const [billBusy, setBillBusy] = useState(false),
+    [billMessage, setBillMessage] = useState("");
   const orderKey = useRef<string | null>(null);
   const dialog = useRef<HTMLDialogElement>(null);
   const cartDialog = useRef<HTMLDialogElement>(null);
@@ -445,6 +446,41 @@ export default function Storefront() {
                   {visit ? `โต๊ะ ${visit.tableCode}` : "ทานที่ร้าน"}
                 </button>
               </div>
+              {visit && mode === "DINE_IN" && (
+                <div className="ref-bill-request-wrap">
+                  <button
+                    className="ref-bill-request"
+                    disabled={billBusy || Boolean(visit.billRequestedAt)}
+                    onClick={() => {
+                      setBillBusy(true);
+                      setBillMessage("");
+                      void api
+                        .requestTableBill(visit.id)
+                        .then((result) => {
+                          setVisit({ ...visit, billRequestedAt: result.billRequestedAt });
+                          setBillMessage("ส่งคำขอเช็คบิลให้พนักงานแล้ว");
+                        })
+                        .catch((e) =>
+                          setBillMessage(
+                            e instanceof Error ? e.message : "ส่งคำขอไม่สำเร็จ กรุณาลองใหม่",
+                          ),
+                        )
+                        .finally(() => setBillBusy(false));
+                    }}
+                  >
+                    {billBusy
+                      ? "กำลังเรียกพนักงาน…"
+                      : visit.billRequestedAt
+                        ? "เรียกเช็คบิลแล้ว"
+                        : "เรียกเช็คบิล"}
+                  </button>
+                  {billMessage && (
+                    <span className="ref-bill-message" role="status">
+                      {billMessage}
+                    </span>
+                  )}
+                </div>
+              )}
               <label className="ref-search-field">
                 <StoreIcon name="search" size={18} />
                 <input

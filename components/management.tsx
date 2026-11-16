@@ -7,9 +7,9 @@ import {
   type Menu,
   type Order,
   type Product,
+  type StaffTable,
   type Store,
 } from "@/lib/types";
-type Table = { id: string; code: string; visit_id: string | null };
 type Refund = {
   id: string;
   amount_satang: number;
@@ -26,7 +26,7 @@ export default function Management({
 }) {
   const [menu, setMenu] = useState<Menu | null>(null),
     [store, setStore] = useState<Store | null>(null),
-    [tables, setTables] = useState<Table[]>([]),
+    [tables, setTables] = useState<StaffTable[]>([]),
     [refunds, setRefunds] = useState<Refund[]>([]),
     [error, setError] = useState(""),
     [busy, setBusy] = useState(false),
@@ -38,12 +38,12 @@ export default function Management({
     const [m, s, t, r] = await Promise.all([
       api.getMenu(),
       api.getStore(),
-      api.request<{ items: Table[] }>("/staff/tables"),
+      api.staffTables(),
       api.request<{ items: Refund[] }>("/staff/refunds"),
     ]);
     setMenu(m);
     setStore(s);
-    setTables(t.items);
+    setTables(t);
     setRefunds(r.items);
     const date = new Intl.DateTimeFormat("en-CA", {
       timeZone: "Asia/Bangkok",
@@ -57,7 +57,21 @@ export default function Management({
     setReceived(report.receivedSatang);
   };
   useEffect(() => {
-    void Promise.resolve().then(load).catch((e) => setError(e.message));
+    let alive = true;
+    const refresh = () => {
+      if (!document.hidden)
+        void api.staffTables().then(setTables).catch((e) => {
+          if (alive) setError(e.message);
+        });
+    };
+    void load().catch((e) => {
+      if (alive) setError(e.message);
+    });
+    const interval = window.setInterval(refresh, 5000);
+    return () => {
+      alive = false;
+      window.clearInterval(interval);
+    };
   }, []);
   const run = async (fn: () => Promise<void>) => {
     setBusy(true);
@@ -144,6 +158,52 @@ export default function Management({
               <span className="muted">
                 {t.visit_id ? "ปิดรอบ" : "เปิดรอบโต๊ะ"}
               </span>
+              {t.visit_id && (
+                <div className="table-bill-summary">
+                  <div className="table-bill-heading">
+                    <strong>ยอดรวมโต๊ะนี้</strong>
+                    <b>{money(t.total_satang ?? 0)}</b>
+                  </div>
+                  {t.bill_requested_at && (
+                    <span className="table-bill-alert">ลูกค้าเรียกเช็คบิล</span>
+                  )}
+                  {t.orders?.length ? (
+                    <div className="table-bill-orders">
+                      {t.orders.map((order) => (
+                        <div className="table-bill-order" key={order.id}>
+                          <div className="table-bill-order-heading">
+                            <b>{order.code}</b>
+                            <span>{money(order.total_satang)}</span>
+                          </div>
+                          <small>
+                            {order.payment_status === "PAID"
+                              ? "ชำระแล้ว"
+                              : order.payment_status === "PARTIALLY_REFUNDED"
+                                ? "คืนเงินบางส่วน"
+                                : order.payment_status === "REFUNDED"
+                                  ? "คืนเงินแล้ว"
+                              : order.payment_status === "REVIEW"
+                                ? "รอตรวจสอบการชำระ"
+                                : "รอชำระ"}
+                          </small>
+                          {order.items.map((item) => (
+                            <div className="table-bill-item" key={item.id}>
+                              <span>
+                                {item.quantity} × {item.name}
+                                {item.options ? ` (${item.options})` : ""}
+                                {item.note ? ` · ${item.note}` : ""}
+                              </span>
+                              <span>{money(item.line_total_satang)}</span>
+                            </div>
+                          ))}
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="muted">ยังไม่มีรายการอาหาร</p>
+                  )}
+                </div>
+              )}
               <div className="table-actions">
                 <button
                   disabled={busy}

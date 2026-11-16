@@ -6,8 +6,10 @@ import type {
   Payment,
   Quote,
   QuoteRequest,
+  StaffTable,
   Store,
   Ticket,
+  TableVisit,
 } from "./types";
 export const DEMO = process.env.NEXT_PUBLIC_DEMO_MODE === "true";
 const configuredBase =
@@ -160,20 +162,37 @@ export const simulate = async (id: string) => {
 export const joinVisit = (
   qrToken: string,
   pin: string,
-): Promise<{ id: string; tableCode: string }> =>
-  DEMO
-    ? Promise.resolve({ id: "demo-visit", tableCode: "05" })
-    : request("/table-visits/join", "POST", { qrToken, pin });
-export const scanTable = (
-  qrToken: string,
-): Promise<{ id: string; tableCode: string; expiresAt: string }> =>
+): Promise<TableVisit> =>
   DEMO
     ? Promise.resolve({
         id: "demo-visit",
         tableCode: "05",
         expiresAt: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
+        billRequestedAt: null,
+      })
+    : request("/table-visits/join", "POST", { qrToken, pin });
+export const scanTable = (
+  qrToken: string,
+): Promise<TableVisit> =>
+  DEMO
+    ? Promise.resolve({
+        id: "demo-visit",
+        tableCode: "05",
+        expiresAt: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
+        billRequestedAt: null,
       })
     : request("/table-visits/scan", "POST", { qrToken });
+export const requestTableBill = (visitId: string) =>
+  DEMO
+    ? Promise.resolve({
+        visitId,
+        billRequestedAt: new Date().toISOString(),
+      })
+    : request<{ visitId: string; billRequestedAt: string }>(
+        `/table-visits/${visitId}/bill-request`,
+        "POST",
+        {},
+      );
 export const staffLogin = async (
   username: string,
   password: string,
@@ -193,6 +212,8 @@ export const staffOrders = async (): Promise<Order[]> =>
   DEMO
     ? demo.demoOrders().map((o) => ({ ...o, pickupCode: undefined }))
     : (await request<{ items: Order[] }>("/staff/orders")).items;
+export const staffTables = async (): Promise<StaffTable[]> =>
+  DEMO ? [] : (await request<{ items: StaffTable[] }>("/staff/tables")).items;
 export const tickets = async (): Promise<Ticket[]> =>
   DEMO
     ? demo.demoTickets()
