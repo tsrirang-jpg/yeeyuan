@@ -516,7 +516,7 @@ export default function Storefront() {
             )}
             {!menu && !error ? (
               <div
-                className="empty-state bowl-loader"
+                className="bowl-loader"
                 role="status"
                 aria-label="กำลังเตรียมเมนูอร่อย ๆ"
               >
@@ -538,7 +538,6 @@ export default function Storefront() {
                   />
                   <path className="bowl-loader-foot" d="M65 103v5c0 4 30 4 30 0v-5" />
                 </svg>
-                <span>กำลังเตรียมเมนูอร่อย ๆ …</span>
               </div>
             ) : (
               <div className="ref-product-grid">
