@@ -515,7 +515,31 @@ export default function Storefront() {
               </div>
             )}
             {!menu && !error ? (
-              <div className="empty-state">กำลังเตรียมเมนูอร่อย ๆ …</div>
+              <div
+                className="empty-state bowl-loader"
+                role="status"
+                aria-label="กำลังเตรียมเมนูอร่อย ๆ"
+              >
+                <svg
+                  className="bowl-loader-art"
+                  viewBox="0 0 160 124"
+                  fill="none"
+                  aria-hidden="true"
+                >
+                  <g className="bowl-loader-steam">
+                    <path d="M54 43c-8-7 8-12 0-20-5-5 0-10 4-14" />
+                    <path d="M80 43c-8-7 8-12 0-20-5-5 0-10 4-14" />
+                    <path d="M106 43c-8-7 8-12 0-20-5-5 0-10 4-14" />
+                  </g>
+                  <path className="bowl-loader-rim" d="M20 55c0-5 120-5 120 0" />
+                  <path
+                    className="bowl-loader-bowl"
+                    d="M21 57c3 27 24 44 59 44s56-17 59-44"
+                  />
+                  <path className="bowl-loader-foot" d="M65 103v5c0 4 30 4 30 0v-5" />
+                </svg>
+                <span>กำลังเตรียมเมนูอร่อย ๆ …</span>
+              </div>
             ) : (
               <div className="ref-product-grid">
                 {visible.map((p, i) => (
