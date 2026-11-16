@@ -65,8 +65,6 @@ services:
         generateValue: true
       - key: BOOTSTRAP_ADMIN_PASSWORD
         sync: false
-      - key: BOOTSTRAP_ADMIN_TOTP_SECRET
-        sync: false
 
 databases:
   - name: yeeyuan-db

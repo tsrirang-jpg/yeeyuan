@@ -17,7 +17,7 @@
 3. รัน `docker compose up --build -d` เพื่อเปิด PostgreSQL และ Spring Boot
 4. ตั้ง `.env.local` เป็น `NEXT_PUBLIC_DEMO_MODE=false` และ `NEXT_PUBLIC_API_BASE_URL=http://127.0.0.1:8080/api/v1`
 5. รัน `npm run dev` เปิด `http://127.0.0.1:3010` หน้าหลังร้านอยู่ `/staff/`
-6. บัญชี local คือ `owner` รหัสผ่านอ่านจาก `BOOTSTRAP_ADMIN_PASSWORD` ใน `.env.backend` ตัวอย่าง local ปิด MFA เฉพาะเมื่อ `APP_ENV=local` เท่านั้น
+6. บัญชี local คือ `owner` รหัสผ่านอ่านจาก `BOOTSTRAP_ADMIN_PASSWORD` ใน `.env.backend` ตัวอย่าง
 
 ฐานข้อมูลเปิดบน loopback พอร์ต 15432 เพื่อไม่ชนพอร์ต PostgreSQL ปกติ ข้อมูลคงอยู่ใน volume `yeeyuan-data` หลีกเลี่ยงคำสั่งลบ volume หากต้องการเก็บออเดอร์
 
@@ -35,7 +35,7 @@
 - คิวแยกสถานี ครัวกดเริ่ม/พร้อม และตรวจรหัสรับก่อนส่งมอบ
 - API หลังร้านสำหรับโต๊ะ ปิดรับออเดอร์ ราคา/จำนวนขายได้ รายงานประจำวัน และ manual refund พร้อมอนุมัติและหลักฐาน
 - LINE follow/unfollow และ outbox ส่งข้อความรับชำระ/พร้อมรับ
-- CSRF, cookie HttpOnly, owner authorization, RBAC, basic rate limit, webhook signature, encrypted pickup code และ TOTP สำหรับบัญชี production
+- CSRF, cookie HttpOnly, owner authorization, RBAC, basic rate limit, webhook signature และ encrypted pickup code
 
 ## ไฟล์สำคัญ
 
@@ -70,7 +70,7 @@ Next.js สร้าง static export ใน `out/` และใช้ route ค
 - ตั้ง Omise secret key, webhook signing secret และ API version จากบัญชีร้าน เปิด PromptPay และทดสอบ expired/unknown/late/duplicate events ด้วยบัญชีจริงก่อนปล่อยให้ลูกค้า
 - เปลี่ยน DATA_ENCRYPTION_KEY เป็น Base64 32 bytes ที่สุ่มใหม่และเก็บแยกจากฐานข้อมูล อย่าทำหายเพราะต้องใช้ถอดข้อมูลที่บันทึกแล้ว
 - ตั้ง LINE Login channel, Messaging API และ LIFF ภายใต้ provider ร้านเดียวกัน ใส่ `openid profile` และกำหนด webhook เป็น `/api/v1/webhooks/line`
-- ตั้ง MFA/รหัสผ่านพนักงานจริง ข้อมูลตัวอย่างไม่เหมาะกับ production บัญชี bootstrap สร้างครั้งแรกและไม่เขียนทับรหัสผ่านเดิมเมื่อ restart
+- ตั้งรหัสผ่านพนักงาน production ที่คาดเดายากและไม่ใช้ซ้ำ ข้อมูลตัวอย่างไม่เหมาะกับ production
 - ตั้ง backup/restore, monitoring และผู้ดูแลเงินค้าง ตรวจ reconciliation กับรายงาน Gateway และ statement ธนาคาร
 - PromptPay ในการออกแบบนี้ใช้การโอนคืนโดยพนักงานผ่านธนาคาร แล้วลงหลักฐานใน refund case ไม่มีการเรียก API คืนเงินที่ช่องทางไม่รองรับ
 

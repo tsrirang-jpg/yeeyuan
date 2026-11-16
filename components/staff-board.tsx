@@ -7,8 +7,7 @@ import Management from "./management";
 export default function StaffBoard() {
   const [logged, setLogged] = useState(api.DEMO),
     [username, setUsername] = useState(""),
-    [password, setPassword] = useState(""),
-    [totp, setTotp] = useState("");
+    [password, setPassword] = useState("");
   const [orders, setOrders] = useState<Order[]>([]),
     [tickets, setTickets] = useState<Ticket[]>([]),
     [billTables, setBillTables] = useState<StaffTable[]>([]),
@@ -68,7 +67,7 @@ export default function StaffBoard() {
               onSubmit={(e) => {
                 e.preventDefault();
                 void run(async () => {
-                  await api.staffLogin(username, password, totp);
+                  await api.staffLogin(username, password);
                   setLogged(true);
                 });
               }}
@@ -90,16 +89,6 @@ export default function StaffBoard() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
-                />
-              </label>
-              <label className="field-label">
-                รหัสยืนยัน 6 หลัก (เมื่อเปิด MFA)
-                <input
-                  autoComplete="one-time-code"
-                  inputMode="numeric"
-                  value={totp}
-                  onChange={(e) => setTotp(e.target.value)}
-                  maxLength={6}
                 />
               </label>
               {error && (

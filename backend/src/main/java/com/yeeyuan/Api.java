@@ -12,7 +12,7 @@ import static com.yeeyuan.Db.*;
 public class Api {
  final Auth auth;final Db db;final Orders orders;final MenuService menu;final Payments payments;final Settings settings;final Admin admin;
  public Api(Auth auth,Db db,Orders orders,MenuService menu,Payments payments,Settings settings,Admin admin){this.auth=auth;this.db=db;this.orders=orders;this.menu=menu;this.payments=payments;this.settings=settings;this.admin=admin;}
- record StaffLogin(@NotBlank String username,@NotBlank String password,String totp){}
+ record StaffLogin(@NotBlank String username,@NotBlank String password){}
  record LineLogin(@NotBlank @Size(max=8192) String idToken){}
  record Transition(@NotBlank String targetStatus,@Min(0) long version){}
  record Complete(@Min(0) long version,String pickupCode){}
@@ -20,7 +20,7 @@ public class Api {
  record ScanJoin(@NotBlank @Size(max=512) String qrToken){}
  @GetMapping("/auth/csrf") Object csrf(HttpServletRequest r,HttpServletResponse s){return auth.csrf(r,s);}
  @PostMapping("/auth/guest") @ResponseStatus(HttpStatus.CREATED) Object guest(HttpServletRequest r,HttpServletResponse s){return auth.guest(r,s);}
- @PostMapping("/auth/staff") Object staff(@Valid @RequestBody StaffLogin b,HttpServletRequest r,HttpServletResponse s){return auth.staffLogin(b.username,b.password,b.totp,r,s);}
+ @PostMapping("/auth/staff") Object staff(@Valid @RequestBody StaffLogin b,HttpServletRequest r,HttpServletResponse s){return auth.staffLogin(b.username,b.password,r,s);}
  @PostMapping("/auth/line") Object line(@Valid @RequestBody LineLogin b,HttpServletRequest r,HttpServletResponse s){return auth.lineLogin(b.idToken,r,s);}
  @PostMapping("/auth/logout") @ResponseStatus(HttpStatus.NO_CONTENT) void logout(HttpServletRequest r,HttpServletResponse s){auth.logout(r,s);}
  @GetMapping("/me") Object me(HttpServletRequest r){var u=auth.user(r);return Map.of("id",u.id(),"kind",u.kind(),"roles",u.roles());}

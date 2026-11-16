@@ -196,7 +196,6 @@ export const requestTableBill = (visitId: string) =>
 export const staffLogin = async (
   username: string,
   password: string,
-  totp: string,
 ) => {
   if (DEMO) return;
   const token = await request<{ csrfToken: string }>("/auth/csrf");
@@ -204,7 +203,6 @@ export const staffLogin = async (
   const result = await request<{ csrfToken: string }>("/auth/staff", "POST", {
     username,
     password,
-    totp,
   });
   csrf = result.csrfToken;
 };

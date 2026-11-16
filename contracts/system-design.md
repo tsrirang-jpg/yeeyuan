@@ -76,7 +76,7 @@ Next.js export ใช้ routes คงที่ `/menu/`, `/cart/`, `/checkout/`
 | MANAGER | จัดเมนู ราคา จำนวนขายได้ เปิดปิดร้าน อนุมัติและยืนยันคืนเงิน ดูรายงาน |
 | OWNER | สิทธิ์ manager และจัดการบัญชีพนักงาน กุญแจเชื่อมต่อและการตั้งค่าระบบ |
 
-พนักงานใช้บัญชีเฉพาะบุคคลและ MFA แบบ TOTP ไม่ใช้ PIN โต๊ะเป็นรหัสพนักงาน API ตรวจทั้ง role, store scope และเจ้าของออเดอร์ทุกครั้ง UUID ที่เดายากไม่ทดแทน authorization
+พนักงานเข้าสู่ระบบด้วยบัญชีเฉพาะบุคคลและรหัสผ่าน API ตรวจทั้ง role, store scope และเจ้าของออเดอร์ทุกครั้ง UUID ที่เดายากไม่ทดแทน authorization
 
 ## 4 กฎเมนู ราคา และออเดอร์
 
@@ -162,7 +162,7 @@ audit_log → ผู้ปฏิบัติและ resource ที่เป�
 | ตาราง | ฟิลด์หลักและหน้าที่ |
 |---|---|
 | store | UUID, name, timezone, currency, accepting_orders, hours JSON, packaging_fee_satang, catalog_version, tax settings |
-| app_user | UUID, kind GUEST/CUSTOMER/STAFF, line_subject unique แบบ nullable, display_name, phone_ciphertext, password_hash, totp_secret_ciphertext, active |
+| app_user | UUID, kind GUEST/CUSTOMER/STAFF, line_subject unique แบบ nullable, display_name, phone_ciphertext, password_hash, active; คอลัมน์ MFA เดิมเก็บไว้ในฐานข้อมูลแต่แอปไม่ใช้แล้ว |
 | staff_role | user_id, store_id, role; PK รวม ป้องกัน role ซ้ำ |
 | auth_session | token_hash unique, user_id, csrf_hash, expires_at, last_seen_at, absolute expiry |
 | dining_table | store_id, code, qr_token_hash unique, active; QR token สุ่ม ไม่ใช้เลขโต๊ะอย่างเดียว |
@@ -222,7 +222,7 @@ API รายการใช้ cursor opaque, limit 1 ถึง 100 ค่า�
 | GET /auth/csrf | สาธารณะ | 200 `{csrfToken}` และ anonymous cookie |
 | POST /auth/guest | anonymous + CSRF | `{}` → 201 session guest, userId, csrfToken |
 | POST /auth/line | anonymous/guest + CSRF | `{idToken}` → 200 userId, csrfToken; verify กับ LINE ก่อนเชื่อมบัญชี |
-| POST /auth/staff | anonymous + CSRF | `{username,password,totp}` → 200 userId, roles, csrfToken |
+| POST /auth/staff | anonymous + CSRF | `{username,password}` → 200 userId, roles, csrfToken |
 | POST /auth/logout | session + CSRF | `{}` → 204 ลบ session |
 | GET /me | session | 200 user และ roles ที่จำเป็น |
 | GET /store | สาธารณะ | 200 ชื่อร้าน เวลาเปิด acceptingOrders ค่าห่อและช่องทางติดต่อ |
@@ -533,9 +533,9 @@ Q001247    กลับบ้าน   พักรายการ    เงิ�
 | SQL injection | prepared queries/JPA parameterization, validation ไม่ต่อ SQL จาก filter |
 | เปลี่ยนราคาเอง | backend คิดยอด ตรวจ quote version และ snapshot; client ไม่มีสิทธิ์ส่งสถานะเงิน |
 | webhook ปลอม/replay | ตรวจ raw-body signature, timestamp เมื่อ provider มี, event dedupe และ retrieve resource ด้วย fixed API host |
-| secret รั่ว | Gateway secret, LINE token/secret, DB password และ TOTP encryption key อยู่ server secret manager ไม่ใช้ NEXT_PUBLIC และไม่ฝังใน image |
+| secret รั่ว | Gateway secret, LINE token/secret และ DB password อยู่ server secret manager ไม่ใช้ NEXT_PUBLIC และไม่ฝังใน image |
 | SSRF ผ่าน QR | ดึง QR เฉพาะ host/path provider ที่กำหนด ไม่ตาม redirect ไปเครือข่าย private จำกัดขนาด/timeouts ตรวจ media และแปลงเป็น PNG |
-| บัญชีพนักงาน | Argon2id password hash, TOTP, login rate limit, สิทธิ์รายคน, disable session ทันทีเมื่อเลิกงาน/พ้นสภาพ |
+| บัญชีพนักงาน | BCrypt password hash ขั้นต่ำ 12 ตัว, login rate limit, สิทธิ์รายคน, disable session ทันทีเมื่อเลิกงาน/พ้นสภาพ |
 | การสั่งรบกวน | rate limit ตาม IP+session+resource, จำกัด pending order, PIN attempts 5 ครั้งต่อ 5 นาทีและ backoff ไม่มี lockout ทั้งร้านจาก IP เดียว |
 | ข้อมูลใน log | redact cookie, Authorization, tokens, raw phone, bank data, QR link ใช้ traceId/orderId แทน |
 | ขโมย backup | เข้ารหัส backup จำกัดสิทธิ์ แยกที่เก็บจาก DB และลองกู้คืนจริง |

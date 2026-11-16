@@ -154,7 +154,7 @@ pre{background:#f0f3ef;border:1px solid #d9e1d6;border-radius:7px;padding:21px 2
 <td>สิทธิ์ manager และจัดการบัญชีพนักงาน กุญแจเชื่อมต่อและการตั้งค่าระบบ</td>
 </tr>
 </tbody></table></div>
-<p>พนักงานใช้บัญชีเฉพาะบุคคลและ MFA แบบ TOTP ไม่ใช้ PIN โต๊ะเป็นรหัสพนักงาน API ตรวจทั้ง role, store scope และเจ้าของออเดอร์ทุกครั้ง UUID ที่เดายากไม่ทดแทน authorization</p>
+<p>พนักงานเข้าสู่ระบบด้วยบัญชีเฉพาะบุคคลและรหัสผ่าน API ตรวจทั้ง role, store scope และเจ้าของออเดอร์ทุกครั้ง UUID ที่เดายากไม่ทดแทน authorization</p>
 <h2 id="section-4">4 กฎเมนู ราคา และออเดอร์</h2>
 <p>สินค้าแบ่ง category เช่น ก๋วยจั๊บญวน และเครื่องดื่ม มีชื่อ รูป คำอธิบาย ราคา สถานีครัว และสถานะ active แต่ละสินค้าเชื่อม option group ที่ระบุจำนวนเลือกขั้นต่ำและสูงสุด เช่น ขนาด เลือก 1, ไข่ เลือก 0 ถึง 1, ความหวาน เลือก 1, น้ำแข็ง เลือก 1</p>
 <p>option ต้องอยู่ในกลุ่มของสินค้านั้นและยัง active ห้ามส่ง ID ของไข่ไปใช้กับชา ค่าตัวเลือกเป็นเงินเพิ่มต่อหน่วยและเริ่มจากศูนย์ขึ้นไป ตัวเลือกซ้ำถูกปฏิเสธ จำนวนตัวเลือกต่อหนึ่งบรรทัดใช้กับทุกหน่วยในบรรทัด ถ้าความหวานต่างกันให้แยกบรรทัด</p>
@@ -278,7 +278,7 @@ audit_log → ผู้ปฏิบัติและ resource ที่เป�
 </tr>
 <tr>
 <td>app_user</td>
-<td>UUID, kind GUEST/CUSTOMER/STAFF, line_subject unique แบบ nullable, display_name, phone_ciphertext, password_hash, totp_secret_ciphertext, active</td>
+<td>UUID, kind GUEST/CUSTOMER/STAFF, line_subject unique แบบ nullable, display_name, phone_ciphertext, password_hash, active; legacy MFA column is retained but unused by the application</td>
 </tr>
 <tr>
 <td>staff_role</td>
@@ -428,7 +428,7 @@ audit_log → ผู้ปฏิบัติและ resource ที่เป�
 <tr>
 <td>POST /auth/staff</td>
 <td>anonymous + CSRF</td>
-<td><code>{username,password,totp}</code> → 200 userId, roles, csrfToken</td>
+<td><code>{username,password}</code> → 200 userId, roles, csrfToken</td>
 </tr>
 <tr>
 <td>POST /auth/logout</td>
@@ -858,7 +858,7 @@ Idempotency-Key: bfd34422-2587-4178-9d21-d8ae603cf4b2
 </tr>
 <tr>
 <td>secret รั่ว</td>
-<td>Gateway secret, LINE token/secret, DB password และ TOTP encryption key อยู่ server secret manager ไม่ใช้ NEXT_PUBLIC และไม่ฝังใน image</td>
+<td>Gateway secret, LINE token/secret และ DB password อยู่ server secret manager ไม่ใช้ NEXT_PUBLIC และไม่ฝังใน image</td>
 </tr>
 <tr>
 <td>SSRF ผ่าน QR</td>
@@ -866,7 +866,7 @@ Idempotency-Key: bfd34422-2587-4178-9d21-d8ae603cf4b2
 </tr>
 <tr>
 <td>บัญชีพนักงาน</td>
-<td>Argon2id password hash, TOTP, login rate limit, สิทธิ์รายคน, disable session ทันทีเมื่อเลิกงาน/พ้นสภาพ</td>
+<td>BCrypt password hash ขั้นต่ำ 12 ตัว, login rate limit, สิทธิ์รายคน, disable session ทันทีเมื่อเลิกงาน/พ้นสภาพ</td>
 </tr>
 <tr>
 <td>การสั่งรบกวน</td>
