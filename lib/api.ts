@@ -33,12 +33,13 @@ class ApiError extends Error {
   constructor(
     message: string,
     readonly status: number,
+    readonly code?: string,
   ) {
     super(message);
     this.name = "ApiError";
   }
 }
-export async function request<T>(
+async function requestOnce<T>(
   path: string,
   method = "GET",
   body?: unknown,
@@ -70,11 +71,58 @@ export async function request<T>(
     throw new ApiError(
       error?.detail || "ติดต่อระบบไม่ได้ กรุณาลองใหม่",
       response.status,
+      error?.code,
     );
   }
   if (response.status === 204) return undefined as T;
   return response.json();
 }
+let recovery: Promise<void> | undefined;
+async function recoverSession(path: string) {
+  const csrfResponse = await requestOnce<{ csrfToken: string }>("/auth/csrf");
+  csrf = csrfResponse.csrfToken;
+  const staffFlow = path.startsWith("/staff/") || path === "/auth/staff";
+  if (staffFlow || path === "/auth/guest" || path === "/auth/logout") return;
+  let me: { kind: string } | null = null;
+  try {
+    me = await requestOnce<{ kind: string }>("/me");
+  } catch (error) {
+    if (!(error instanceof ApiError) || error.status !== 401) throw error;
+  }
+  if (me) return;
+  const guest = await requestOnce<{ csrfToken: string }>("/auth/guest", "POST", {});
+  csrf = guest.csrfToken;
+}
+export async function request<T>(
+  path: string,
+  method = "GET",
+  body?: unknown,
+  idem?: string,
+  timeoutMs?: number,
+): Promise<T> {
+  try {
+    return await requestOnce<T>(path, method, body, idem, timeoutMs);
+  } catch (error) {
+    if (!(error instanceof ApiError)) throw error;
+    const staffFlow = path.startsWith("/staff/") || path === "/auth/staff";
+    const recoverable = error.code === "CSRF_INVALID" ||
+      (error.code === "LOGIN_REQUIRED" && !staffFlow &&
+        !["/auth/csrf", "/auth/guest", "/auth/logout"].includes(path));
+    if (!recoverable) throw error;
+    recovery ??= recoverSession(path).finally(() => {
+      recovery = undefined;
+    });
+    await recovery;
+    return requestOnce<T>(path, method, body, idem, timeoutMs);
+  }
+}
+export const isSessionExpired = (error: unknown): boolean =>
+  error instanceof ApiError && error.code === "LOGIN_REQUIRED";
+export const isTableVisitExpired = (error: unknown): boolean =>
+  error instanceof ApiError && ["INVALID_VISIT", "VISIT_NOT_OPEN"].includes(error.code ?? "");
+export const isQuoteExpired = (error: unknown): boolean =>
+  error instanceof ApiError &&
+  ["NOT_FOUND", "QUOTE_EXPIRED", "REQUOTE_REQUIRED", "INVALID_VISIT"].includes(error.code ?? "");
 async function retryRead<T>(path: string): Promise<T> {
   let lastError: unknown;
   for (let attempt = 0; attempt < 8; attempt++) {

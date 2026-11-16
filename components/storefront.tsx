@@ -7,6 +7,7 @@ import {
   type CartItem,
   type Menu,
   type Mode,
+  type Order,
   type Product,
   type Quote,
   type Store,
@@ -209,14 +210,24 @@ export default function Storefront() {
         setShowVisit(true);
         return;
       }
-      const q = await api.quoteCart({
+      const quoteRequest = {
         mode,
         ...(visit && mode === "DINE_IN" ? { visitId: visit.id } : {}),
         items: cart.map(({ key, ...i }) => {
           void key;
           return i;
         }),
-      });
+      };
+      let q: Quote;
+      try {
+        q = await api.quoteCart(quoteRequest);
+      } catch (e) {
+        if (mode !== "DINE_IN" || !tableToken || !api.isTableVisitExpired(e))
+          throw e;
+        const renewedVisit = await api.scanTable(tableToken);
+        setVisit(renewedVisit);
+        q = await api.quoteCart({ ...quoteRequest, visitId: renewedVisit.id });
+      }
       setCheckout(q);
       orderKey.current = crypto.randomUUID();
       setCartOpen(false);
@@ -227,11 +238,31 @@ export default function Storefront() {
       if (mode === "TAKEAWAY" && !pickupName.trim())
         throw new Error("กรุณาระบุชื่อรับอาหาร");
       if (!orderKey.current) orderKey.current = crypto.randomUUID();
-      const o = await api.createOrder(
-        checkout.id,
-        pickupName.trim(),
-        orderKey.current,
-      );
+      let o: Order;
+      try {
+        o = await api.createOrder(
+          checkout.id,
+          pickupName.trim(),
+          orderKey.current,
+        );
+      } catch (e) {
+        if (!api.isQuoteExpired(e)) throw e;
+        let currentVisit = visit;
+        if (mode === "DINE_IN" && tableToken) {
+          currentVisit = await api.scanTable(tableToken);
+          setVisit(currentVisit);
+        }
+        const renewedQuote = await api.quoteCart({
+          mode,
+          ...(currentVisit && mode === "DINE_IN" ? { visitId: currentVisit.id } : {}),
+          items: cart.map(({ key, ...item }) => {
+            void key;
+            return item;
+          }),
+        });
+        setCheckout(renewedQuote);
+        throw new Error("เซสชันหรือรายการเดิมหมดอายุแล้ว ระบบปรับรายการใหม่ กรุณาตรวจสอบยอดแล้วกดยืนยันอีกครั้ง");
+      }
       setCart([]);
       localStorage.removeItem("yeeyuan-cart");
       router.push(`/orders/?id=${o.id}`);
@@ -454,18 +485,28 @@ export default function Storefront() {
                     onClick={() => {
                       setBillBusy(true);
                       setBillMessage("");
-                      void api
-                        .requestTableBill(visit.id)
-                        .then((result) => {
-                          setVisit({ ...visit, billRequestedAt: result.billRequestedAt });
+                      void (async () => {
+                        try {
+                          let currentVisit = visit;
+                          let result: { visitId: string; billRequestedAt: string };
+                          try {
+                            result = await api.requestTableBill(currentVisit.id);
+                          } catch (e) {
+                            if (!tableToken || !api.isTableVisitExpired(e)) throw e;
+                            currentVisit = await api.scanTable(tableToken);
+                            setVisit(currentVisit);
+                            result = await api.requestTableBill(currentVisit.id);
+                          }
+                          setVisit({ ...currentVisit, billRequestedAt: result.billRequestedAt });
                           setBillMessage("ส่งคำขอเช็คบิลให้พนักงานแล้ว");
-                        })
-                        .catch((e) =>
+                        } catch (e) {
                           setBillMessage(
                             e instanceof Error ? e.message : "ส่งคำขอไม่สำเร็จ กรุณาลองใหม่",
-                          ),
-                        )
-                        .finally(() => setBillBusy(false));
+                          );
+                        } finally {
+                          setBillBusy(false);
+                        }
+                      })();
                     }}
                   >
                     {billBusy

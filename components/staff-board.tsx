@@ -32,7 +32,10 @@ export default function StaffBoard() {
     let alive = true;
     const load = () =>
       refresh().catch((e) => {
-        if (alive) setError(e.message);
+        if (alive && api.isSessionExpired(e)) {
+          setLogged(false);
+          setError("เซสชันหมดอายุ กรุณาเข้าสู่ระบบอีกครั้ง");
+        } else if (alive) setError(e.message);
       });
     void load();
     const t = setInterval(() => {
@@ -49,7 +52,10 @@ export default function StaffBoard() {
     try {
       await fn();
     } catch (e) {
-      setError(e instanceof Error ? e.message : "เกิดข้อผิดพลาด");
+      if (api.isSessionExpired(e)) {
+        setLogged(false);
+        setError("เซสชันหมดอายุ กรุณาเข้าสู่ระบบอีกครั้ง");
+      } else setError(e instanceof Error ? e.message : "เกิดข้อผิดพลาด");
     } finally {
       setBusy(false);
     }
