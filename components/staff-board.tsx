@@ -15,7 +15,8 @@ export default function StaffBoard() {
     [tab, setTab] = useState("kitchen"),
     [error, setError] = useState(""),
     [busy, setBusy] = useState(false),
-    [synced, setSynced] = useState("");
+    [synced, setSynced] = useState(""),
+    [checkingSession, setCheckingSession] = useState(!api.DEMO);
   const refresh = async () => {
     const [o, t, tableRows] = await Promise.all([
       api.staffOrders(),
@@ -27,6 +28,25 @@ export default function StaffBoard() {
     setBillTables(tableRows.filter((table) => Boolean(table.bill_requested_at)));
     setSynced(new Date().toLocaleTimeString("th-TH"));
   };
+  useEffect(() => {
+    if (api.DEMO) return;
+    let alive = true;
+    void api
+      .staffSession()
+      .then((active) => {
+        if (alive) setLogged(active);
+      })
+      .catch((e) => {
+        if (alive)
+          setError(e instanceof Error ? e.message : "ตรวจสอบเซสชันไม่สำเร็จ");
+      })
+      .finally(() => {
+        if (alive) setCheckingSession(false);
+      });
+    return () => {
+      alive = false;
+    };
+  }, []);
   useEffect(() => {
     if (!logged) return;
     let alive = true;
@@ -64,7 +84,12 @@ export default function StaffBoard() {
     <>
       <Header active="staff" />
       <main className="page-shell wide">
-        {!logged ? (
+        {checkingSession ? (
+          <section className="login-card">
+            <span className="eyebrow">YEE YUAN TEAM</span>
+            <p className="muted" role="status">กำลังตรวจสอบเซสชัน…</p>
+          </section>
+        ) : !logged ? (
           <section className="login-card">
             <span className="eyebrow">YEE YUAN TEAM</span>
             <h1>ยินดีต้อนรับกลับ</h1>
@@ -114,7 +139,25 @@ export default function StaffBoard() {
                 <span className="eyebrow">TODAY AT YEE YUAN</span>
                 <h1>จัดการมื้ออร่อย</h1>
               </div>
-              <span className="muted">อัปเดตล่าสุด {synced || "…"}</span>
+              <div
+                className="staff-session-actions"
+                style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}
+              >
+                <span className="muted">อัปเดตล่าสุด {synced || "…"}</span>
+                <button
+                  className="small-button"
+                  disabled={busy}
+                  onClick={() =>
+                    void run(async () => {
+                      await api.staffLogout();
+                      setLogged(false);
+                      setPassword("");
+                    })
+                  }
+                >
+                  ออกจากระบบ
+                </button>
+              </div>
             </div>
             <div className="stat-grid">
               <div>

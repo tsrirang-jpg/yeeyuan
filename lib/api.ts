@@ -241,6 +241,29 @@ export const requestTableBill = (visitId: string) =>
         "POST",
         {},
       );
+export const staffSession = async (): Promise<boolean> => {
+  if (DEMO) return true;
+  try {
+    const token = await requestOnce<{ csrfToken: string }>("/auth/csrf");
+    csrf = token.csrfToken;
+    const me = await requestOnce<{ kind: string }>("/me");
+    return me.kind === "STAFF";
+  } catch (error) {
+    if (error instanceof ApiError && error.status === 401) {
+      csrf = "";
+      return false;
+    }
+    throw error;
+  }
+};
+export const staffLogout = async (): Promise<void> => {
+  if (DEMO) return;
+  const token = await requestOnce<{ csrfToken: string }>("/auth/csrf");
+  csrf = token.csrfToken;
+  await requestOnce<void>("/auth/logout", "POST", {});
+  csrf = "";
+  initialized = undefined;
+};
 export const staffLogin = async (
   username: string,
   password: string,
